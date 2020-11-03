@@ -9,6 +9,7 @@ Please install [periodictable](https://github.com/pkienzle/periodictable) before
 **This will require you to use python 3.7 or earlier** as 3.8 dropped support for this library.
 
 If you want to use the script with 3.8 you will have to delete the lines up to the comment that says `# CUT HERE`
+
 This means you cant use periodic table features.
 
 # usage
@@ -16,6 +17,7 @@ While the interface is pretty straight forward, there are a few hidden tricks.
 
 ## using *10^
 When entering a number, you can end it with "e" to prompt a "*10^" entry.
+
 This will (obviously) multiply the number by 10 to number entered.
 
 example:
