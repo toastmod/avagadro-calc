@@ -175,6 +175,9 @@ while 1==1:
 
 
     #========================================================
+    # UNFINISHED STUFF I MIGHT ADD IN THE FUTURE
+    # fun idea: try fixing this code yourself :D
+    #========================================================
 
     if choice == 100:
         #simplify mole ratio
