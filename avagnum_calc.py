@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.7
 from periodictable import elements
 
 #generate table
