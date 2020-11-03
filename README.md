@@ -28,7 +28,7 @@ atoms: 7e
 moles: 1.1624045167718366e-17
 ```
 
-## using getting periodic table data
+## using periodic table data
 Currently only mass and atomic number are available, but if you know how to use the periodictable you can add the other data to the dictionary generator in the header of the script.
 
 You can enter a mass number like this (in this case Helium):
