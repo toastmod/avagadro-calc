@@ -1,9 +1,11 @@
 #!/usr/bin/env python3.7
 from periodictable import elements
 
+tmp2 = 0
+
 #generate table
 print("generating table...")
-ptable = {}
+ptable = {"STP":{"Pkpa":101.321,"Patm":1,"Tk":273.15,"Tf":32,"Tc":0,"molV":22.4,"molV1bar":22.7}}
 for e in elements:
     ptable[e.symbol] = {"name": e.name, "mass": e.mass, "num": e.number, "ions": e.ion}
 print("done.\n")
@@ -16,6 +18,9 @@ def detectpwr(rcv):
     snd = 0.0 #final result
     cmd = ""
     pwr = 0.0
+
+    if (str(rcv) == 'None') or (str(rcv) == ""):
+        return ""
     
     #if command or not
     if str(rcv).find(":") >= 0:
@@ -67,6 +72,72 @@ def atoms_to_moles(atoms):
 def moles_to_atoms(moles):
     return moles*avagnum
 
+def gen_e_config(atomnum):
+        fillorder = ["1s", "2s", "2p", "3s", "3p", "4s", "3d", "4p", "5s", "4d", "5p", "6s", "4f", "5d", "6p", "7s", "5f", "6d", "7p"]
+        fillamt = {"s":2,"p":6,"d":10,"f":14}
+        res = []
+        for fill in fillorder:
+            if atomnum != 0:
+                amt = fillamt[fill[1]]
+                if amt > atomnum:
+                    tmp = 0
+                    while atomnum != 0:
+                        tmp += 1
+                        atomnum -= 1
+                    res.append(fill+"^"+str(tmp))
+                else:
+                    atomnum -= amt
+                    res.append(fill+"^"+str(amt))
+        return res
+
+def gen_qn(electron):
+    global tmp2
+    shell_vals = {"s":0,"p":1,"d":2,"f":3}
+    level = int(electron[0])
+    shell = electron[1]
+    e_amt = int(electron[3])
+
+    n = level
+    l = shell_vals[shell]
+
+    ML_fill = []
+    tmp = -l
+    if l != 0:
+        while (tmp != l):
+            ML_fill.append(tmp)
+            tmp += 1
+    else:
+        ML_fill.append(0)
+
+        tmp2 = 0
+        down_spin = False
+        for i in range(0,e_amt):
+            if tmp2 >= len(ML_fill):
+                tmp2 = 0
+                down_spin = not down_spin
+            else:
+                tmp2 += 1
+
+    ml = ML_fill[tmp2]
+    ms = str("-"*(down_spin))+str("1/2")
+    return [int(n),int(l),int(ml),ms]
+
+# PV=nRT functions
+# ideal gas constant
+R = 0.0821
+
+def pvnrt_v(P,T,n):
+    return (n*R*T)/P
+
+def pvnrt_p(V,n,T):
+    return (n*R*T)/V
+
+def pvnrt_n(P,V,T):
+    return (P*V)/(R*T)
+
+def pvnrt_t(P,V,n):
+    (P*V)/(n*R)
+
 #====================================================================
 
 while 1==1:
@@ -80,6 +151,12 @@ while 1==1:
     print("6. moles -> grams")
     print("7. quantum number validator")
     print("8. get electron configuration")
+    print("9. get quantum number")
+    print("10. get electrons and orbitals in shell")
+    print("11. PVNRT")
+    print("12. (LR_ratio,R_Liters) -> (L_moles,L_Grams)")
+    print("13. (LR_ratio,R_moles)  -> (R_moles,R_Liters)")
+    print()
     choice = int(input("[#]: "))
     print("===================================")
     if choice == 1:
@@ -102,23 +179,27 @@ while 1==1:
         #atoms to moles
         atoms = detectpwr(input("atoms: "))
         print("moles: "+str(atoms_to_moles(atoms)))
+        input("[enter]")
 
     if choice == 4:
         #moles to atoms
         moles = detectpwr(input("moles: "))
         print("atoms: "+str(moles_to_atoms(moles)))
+        input("[enter]")
 
     if choice == 5:
         #grams to moles
         grams = detectpwr(input("grams: "))
         molmass = detectpwr(input("molar mass: "))
         print("moles: "+str(grams/molmass))
+        input("[enter]")
 
     if choice == 6:
         #moles to grams
         moles = detectpwr(input("moles: "))
         molmass = detectpwr(input("molar mass: "))
         print("grams: "+str(moles*molmass))
+        input("[enter]")
 
     if choice == 7:
         #quantum number validator
@@ -142,26 +223,20 @@ while 1==1:
                         flag = True
         if flag==False:
             print("QN INVALID")
-        else:
+        else:   
             print("QN VALID :)")
+        input("[enter]")
 
     if choice == 8:
-        fillorder = ["1s", "2s", "2p", "3s", "3p", "4s", "3d", "4p", "5s", "4d", "5p", "6s", "4f", "5d", "6p", "7s", "5f", "6d", "7p"]
+        res = gen_e_config(detectpwr(input("atomic number: ")))
         fillamt = {"s":2,"p":6,"d":10,"f":14}
-        res = []
-        atomnum = detectpwr(input("atomic number: "))
-        for fill in fillorder:
-            if atomnum != 0:
-                amt = fillamt[fill[1]]
-                if amt > atomnum:
-                    tmp = 0
-                    while atomnum != 0:
-                        tmp += 1
-                        atomnum -= 1
-                    res.append(fill+"^"+str(tmp))
-                else:
-                    atomnum -= amt
-                    res.append(fill+"^"+str(amt))
+
+        magnetism = "diamagnetic"
+        tmp = res[-1].split("^")
+        if int(tmp[1]) < fillamt[tmp[0][1]]:
+            magnetism = "paramagnetic"
+
+
         print("electron config:")
         for i in res:
             print(i,end=" ")
@@ -169,17 +244,126 @@ while 1==1:
         print("MASTERINGCHEM friendly text:")
         for i in res:
             print(i,end="")
-        print("\n")
+        print("\n\nelement is "+magnetism+"\n")
+        input("[enter]")
+
+    if choice == 9:
+        electrons = gen_e_config(detectpwr(input("atomic number: ")))
+        print("POSSIBLE QUANTUM NUMBERS:")
+        print("")
+        for electron in electrons:
+            qn = gen_qn(electron)
+            print(electron+": "+str(qn).replace("[","").replace("]","").replace("'",""))
+            if qn[-1][0] == "-":
+                qn2 = qn
+                qn2[-1] = qn2[-1].replace("-","")
+                print("      "+str(qn2).replace("[","").replace("]","").replace("'",""))
+            print("")
+        input("[enter]")
+
+    if choice == 10:
+        subshells = ["1s", "2s", "2p", "3s", "3p", "4s", "3d", "4p", "5s", "4d", "5p", "6s", "4f", "5d", "6p", "7s", "5f", "6d", "7p"]
+        eamt = {"s":2,"p":6,"d":10,"f":14}
+        tmp = 0
+        inp = input("n = ")
+        for s in subshells:
+            if inp == s[0]:
+                tmp += eamt[s[1]]
+        print(str(int(tmp))+" electrons")
+        print(str(int(tmp/2))+" orbitals")
+        input("[enter]")
+
+    if choice == 11:
+        P = detectpwr(input("P="))
+        V = detectpwr(input("V="))
+        n = detectpwr(input("n="))
+        T = detectpwr(input("T="))
+
+        if P == "":
+            P = pvnrt_p(float(V),float(n),float(T))
+            print("P -> "+str(P))
+        if V == "":
+            V = pvnrt_v(float(P),float(n),float(T))
+            print("V -> "+str(V))
+        if n == "":
+            n = pvnrt_n(float(P),float(V),float(T))
+            print("n -> "+str(n))
+        if T == "":
+            T = pvnrt_t(float(P),float(V),float(n))
+            print("T -> "+str(T))
+
+    
+    if choice==12:
+        Lr = detectpwr(input("Left ratio: "))
+        Rr = detectpwr(input("Right ratio: "))
+        V = detectpwr(input("Right Volume: "))
+        Rm = V*1000
+        print("PVNRT environment:\n")
+        P = detectpwr(input("P="))
+        n = ""
+        T = detectpwr(input("T="))
+
+        if P == "":
+            P = pvnrt_p(float(V),float(n),float(T))
+            print("P -> "+str(P))
+        if V == "":
+            V = pvnrt_v(float(P),float(n),float(T))
+            print("V -> "+str(V))
+        if n == "":
+            n = pvnrt_n(float(P),float(V),float(T))
+            print("n -> "+str(n))
+        if T == "":
+            T = pvnrt_t(float(P),float(V),float(n))
+            print("T -> "+str(T))
+
+        answer_mol = (n*Lr)/Rr
+        answer_grams = atoms_to_grams(moles_to_atoms(answer_mol),detectpwr(input("Left molar mass: ")))
+        print("Left:")
+        print("\tMoles> "+str(answer_mol))
+        print("\tGrams> "+str(answer_grams))
+
+    if choice==13:
+        Lr = detectpwr(input("Left ratio: "))
+        Rr = detectpwr(input("Right ratio: "))
+        Ln = detectpwr(input("Left moles used: "))
+        # get right ratio
+        n = (Ln*Rr)/Lr
+
+        print("PVNRT environment:\n")
+        P = detectpwr(input("P="))
+        V = ""
+        T = detectpwr(input("T="))
+
+        if P == "":
+            P = pvnrt_p(float(V),float(n),float(T))
+            print("P -> "+str(P))
+        if V == "":
+            V = pvnrt_v(float(P),float(n),float(T))
+            print("V -> "+str(V))
+        if n == "":
+            n = pvnrt_n(float(P),float(V),float(T))
+            print("n -> "+str(n))
+        if T == "":
+            T = pvnrt_t(float(P),float(V),float(n))
+            print("T -> "+str(T))
+
+        answer_mol = n
+        #answer_liters = atoms_to_grams(moles_to_atoms(answer_mol),detectpwr(input("Right molar mass: ")))/1000
+        print("Right:")
+        print("\tMoles> "+str(answer_mol))
+        print("\tLiters> "+str(V))
+
+
+        
+        
+        
 
 
 
 
     #========================================================
-    # UNFINISHED STUFF I MIGHT ADD IN THE FUTURE
-    # fun idea: try fixing this code yourself :D
-    #========================================================
 
-    if choice == 100:
+    if choice == 9999:
         #simplify mole ratio
         elem_mol = {} #collect element and moles here
         highest_tenth = 1;
@@ -242,13 +426,25 @@ while 1==1:
             print(str(e[0])+str(e[1]/index2)+":",end="")
 
         parts = len(elem_mol)
-        print("[enter]")
+        input("[enter]")
 
     #=================================================
 
     if choice == 0:
         #command test
-        print(detectpwr(input("[$]>>")))
+        inp = input("[$]>>")
+        inp2 = "0"
+        sum_this = []
+        sum = 0.0
+        if inp == "add":
+            while inp2 != "":
+                sum_this.append(inp2)
+                inp2 = str(detectpwr(e))
+            for e in sum_this:
+                sum += float(e)
+            print(sum)
+        else:
+            print(detectpwr(inp))
         input("[enter]")
 
     if choice == 999:
