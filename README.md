@@ -50,8 +50,20 @@ in the 0 command, you can output the name of an element:
 ```
 [$]>>He:name
 helium
-[enter]
 ```
+
+## using STP data
+STP data can be accessed the same format as periodic table entries.
+
+```
+# these are the entries...
+{"STP":{"Pkpa":101.321,"Patm":1,"Tk":273.15,"Tf":32,"Tc":0,"molV":22.4,"molV1bar":22.7}}
+
+# so for example...
+[$]>>STP:Patm
+1.0
+```
+
 
 
 
