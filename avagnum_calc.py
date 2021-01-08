@@ -1,5 +1,6 @@
-#!/usr/bin/env python3.7
 from periodictable import elements
+import math
+from decimal import Decimal, getcontext
 
 tmp2 = 0
 
@@ -13,6 +14,10 @@ print("done.\n")
 # CUT HERE
 
 avagnum = 6.022*(10**23)
+
+def log(x):
+    
+    return math.log(x,10)
 
 def detectpwr(rcv):
     snd = 0.0 #final result
@@ -156,6 +161,15 @@ while 1==1:
     print("11. PVNRT")
     print("12. (LR_ratio,R_Liters) -> (L_moles,L_Grams)")
     print("13. (LR_ratio,R_moles)  -> (R_moles,R_Liters)")
+    print("14. C1*V1=C2*V2")
+    print("15. Beer's Law [ A=mc ]")
+    print("16. Beer's Law [ A=Ebc ]")
+    print("17. Beer's Law [ A=log(T) | A1/A2=C1/C2 ]")
+    print("18. Determine the Mole Ratio (from moles)")
+    print("19. Determine the Mole Ratio (from grams/molmass)")
+    print("20. mmH2O -> mmHg")
+    print("21. mmHg -> mmH2O")
+    print("22. rate of reaction (given a timetable)")
     print()
     choice = int(input("[#]: "))
     print("===================================")
@@ -353,7 +367,188 @@ while 1==1:
         print("\tMoles> "+str(answer_mol))
         print("\tLiters> "+str(V))
 
+    if choice==14:
+        #c1*v1=c2*v2
+        c1 = detectpwr(input("C1="))
+        v1 = detectpwr(input("V1="))
+        c2 = detectpwr(input("C2="))
+        v2 = detectpwr(input("V2="))
 
+        if c1=="":
+            print("\nC1 -> "+str((c2*v2)/v1))
+
+        if c2=="":
+            print("\nC2 -> "+str((c1*v1)/v2))
+
+        if v1=="":
+            print("\nC1 -> "+str((c2*v2)/c1))
+
+        if v2=="":
+            print("\nC2 -> "+str((c1*v1)/c2))
+
+    if choice==15:
+        A = detectpwr(input("A=")) # absorvity
+        c = detectpwr(input("c[concentration]="))
+        m = detectpwr(input("m (slope)="))
+
+        if A=="":
+            A=m*c
+            print("A -> "+str(A))
+
+        if c=="":
+            c=A/m
+            print("c -> "+str(c))
+
+    if choice==16:
+        A = detectpwr(input("A=")) # absorvity
+        c = detectpwr(input("c[concentration]="))
+        E = detectpwr(input("E="))
+        b = detectpwr(input("b[molar absorp.]="))
+
+        if A=="":
+            A=E*b*c
+            print("A -> "+str(A))
+
+        if E=="":
+            E=A/(b*c)
+            print("E -> "+str(E))
+
+        if b=="":
+            b=A/(E*c)
+            print("b -> "+str(b))
+
+        if c=="":
+            c=A/(E*b)
+            print("c -> "+str(c))
+
+    if choice==17:
+        
+        a1 = detectpwr(input("Absorbance    of [1]="))
+        c1 = detectpwr(input("Concentration of [1]="))
+        t1 = detectpwr(input("Tranmittance% of [1]="))
+
+        a2 = detectpwr(input("Absorbance    of [2]="))
+        c2 = detectpwr(input("Concentration of [2]="))
+        t2 = detectpwr(input("Tranmittance% of [2]="))
+
+
+        if a1=="":
+            if (t1!=""):
+                a1 = log(100/t1)
+                print("A1 -> "+str(a1))
+
+            elif (a2 == ""):
+                # caculate a2 with t2
+                a2 = log(100/t2)
+                print("A2 -> "+str(a2))
+                a1 = (c1*a2)/c2
+                print("A1 -> "+str(a1))
+
+        if a2=="":
+            if (t2!=""):
+                a2 = log(100/t2)
+                print("A2 -> "+str(a2))
+
+            elif (a1 == ""):
+                # caculate a1 with t1
+                a1 = log(100/t1)
+                print("A1 -> "+str(a1))
+                a2 = (c2*a1)/c1
+                print("A2 -> "+str(a2))
+
+        if c1=="":
+            if (a2 == ""):
+                # caculate a2 with t2
+                a2 = log(100/t2)
+                print("A2 -> "+str(a2))
+
+            elif (a1 == ""):
+                # caculate a1 with t1
+                a1 = log(100/t1)
+                print("A1 -> "+str(a1))
+
+            c1 = (a1*c2)/a2
+            print("C1 -> "+str(c1))
+
+        if c2=="":
+            if (a2 == ""):
+                # caculate a2 with t2
+                a2 = log(100/t2)
+                print("A2 -> "+str(a2))
+
+            elif (a1 == ""):
+                # caculate a1 with t1
+                a1 = log(100/t1)
+                print("A1 -> "+str(a1))
+
+            c2 = (a2*c1)/a1
+            print("C2 -> "+str(c2))
+
+    if choice==18:
+        n1 = detectpwr(input("left [moles]:"))
+        n2 = detectpwr(input("right [moles]:"))
+
+        lowest = 0
+        highest = 0
+
+        if n1 > n2:
+            lowest = n2
+            highest = n1
+            lowscale = 1/lowest
+            r1 = highest*lowscale
+            r2 = lowest*lowscale
+        else:
+            lowest = n1
+            highest = n2
+            lowscale = 1/lowest
+            r2 = highest*lowscale
+            r1 = lowest*lowscale
+
+        print("Ratio (exact): "+str(r1)+":"+str(r2))
+        print("Ratio (trunc): "+str(int(r1))+":"+str(int(r2)))
+
+    if choice==19:
+        m1 = detectpwr(input("left [grams]:"))
+        molmass1 = detectpwr(input("molar mass: "))
+        m2 = detectpwr(input("right [grams]:"))
+        molmass2 = detectpwr(input("molar mass: "))
+
+        n1 = atoms_to_moles((grams_to_atoms(m1,molmass1)))
+        n2 = atoms_to_moles((grams_to_atoms(m2,molmass2)))
+
+        lowest = 0
+        highest = 0
+
+        if n1 > n2:
+            lowest = n2
+            highest = n1
+            lowscale = 1/lowest
+            r1 = highest*lowscale
+            r2 = lowest*lowscale
+        else:
+            lowest = n1
+            highest = n2
+            lowscale = 1/lowest
+            r2 = highest*lowscale
+            r1 = lowest*lowscale
+
+        print("Ratio (exact): "+str(r1)+":"+str(r2))
+        print("Ratio (trunc): "+str(int(r1))+":"+str(int(r2)))
+
+    if choice==20:
+        bar = detectpwr(input("bar (optional): "))
+        mmh2o = detectpwr(input("mmH2O: "))
+        print("mmHg -> "+str(bar-(0.0735559*mmh2o)))
+
+    if choice==21:
+        bar = detectpwr(input("bar (optional): "))
+        mmhg = bar-detectpwr(input("mmHg: "))
+        print("mmH2O -> "+str((mmhg/0.0735559)))
+
+    if choice==22:
+        x = detectpwr(input("Formation@timeX:"))
+        y = detectpwr(input("Formation@timey:"))
+        print("change = "+str(abs(x-y)))
         
         
         
