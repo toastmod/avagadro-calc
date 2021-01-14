@@ -169,7 +169,9 @@ while 1==1:
     print("19. Determine the Mole Ratio (from grams/molmass)")
     print("20. mmH2O -> mmHg")
     print("21. mmHg -> mmH2O")
-    print("22. rate of reaction (given a timetable)")
+    print("22. rate of formation/decomp (given time+formation)")
+    print("23. Formation Rate -> Consumption Rate (given moles)")
+    #print("24. Rate Law")
     print()
     choice = int(input("[#]: "))
     print("===================================")
@@ -305,6 +307,7 @@ while 1==1:
         if T == "":
             T = pvnrt_t(float(P),float(V),float(n))
             print("T -> "+str(T))
+        input("[enter]")
 
     
     if choice==12:
@@ -335,6 +338,7 @@ while 1==1:
         print("Left:")
         print("\tMoles> "+str(answer_mol))
         print("\tGrams> "+str(answer_grams))
+        input("[enter]")
 
     if choice==13:
         Lr = detectpwr(input("Left ratio: "))
@@ -366,6 +370,7 @@ while 1==1:
         print("Right:")
         print("\tMoles> "+str(answer_mol))
         print("\tLiters> "+str(V))
+        input("[enter]")
 
     if choice==14:
         #c1*v1=c2*v2
@@ -385,6 +390,7 @@ while 1==1:
 
         if v2=="":
             print("\nC2 -> "+str((c1*v1)/c2))
+        input("[enter]")
 
     if choice==15:
         A = detectpwr(input("A=")) # absorvity
@@ -398,6 +404,7 @@ while 1==1:
         if c=="":
             c=A/m
             print("c -> "+str(c))
+        input("[enter]")
 
     if choice==16:
         A = detectpwr(input("A=")) # absorvity
@@ -420,6 +427,7 @@ while 1==1:
         if c=="":
             c=A/(E*b)
             print("c -> "+str(c))
+        input("[enter]")
 
     if choice==17:
         
@@ -483,6 +491,7 @@ while 1==1:
 
             c2 = (a2*c1)/a1
             print("C2 -> "+str(c2))
+        input("[enter]")
 
     if choice==18:
         n1 = detectpwr(input("left [moles]:"))
@@ -506,6 +515,7 @@ while 1==1:
 
         print("Ratio (exact): "+str(r1)+":"+str(r2))
         print("Ratio (trunc): "+str(int(r1))+":"+str(int(r2)))
+        input("[enter]")
 
     if choice==19:
         m1 = detectpwr(input("left [grams]:"))
@@ -534,23 +544,97 @@ while 1==1:
 
         print("Ratio (exact): "+str(r1)+":"+str(r2))
         print("Ratio (trunc): "+str(int(r1))+":"+str(int(r2)))
+        input("[enter]")
 
     if choice==20:
         bar = detectpwr(input("bar (optional): "))
         mmh2o = detectpwr(input("mmH2O: "))
         print("mmHg -> "+str(bar-(0.0735559*mmh2o)))
+        input("[enter]")
 
     if choice==21:
         bar = detectpwr(input("bar (optional): "))
         mmhg = bar-detectpwr(input("mmHg: "))
         print("mmH2O -> "+str((mmhg/0.0735559)))
+        input("[enter]")
 
     if choice==22:
-        x = detectpwr(input("Formation@timeX:"))
-        y = detectpwr(input("Formation@timey:"))
-        print("change = "+str(abs(x-y)))
-        
-        
+        floop = True
+        ft = []
+        while floop:
+            form = detectpwr(input("formation: "))
+            if form == "":
+                floop = False
+            time = detectpwr(input("time: "))
+            if time == "":
+                floop = False
+
+            if floop == True:
+                ft.append([form,time])
+
+        print("*********")
+        print("")
+        sum_ft = 0
+        for i in range(0,len(ft)-1):
+            delta_f = ft[i+1][0]-ft[i][0]
+            delta_t = ft[i+1][1]-ft[i][1]
+            delta_ft = delta_f/delta_t
+            sum_ft += delta_ft
+            print(str(delta_f/delta_t),end=",")
+
+        print("")
+        average = sum_ft/(len(ft)-1)
+        print("average="+str(average))
+        print("decomp.="+str(2*average))
+        input("[enter]")
+
+    if choice==23:
+        print("[EQ LEFT SIDE]")
+        c_mol  = detectpwr(input("Consumed moles: "))
+        c_rate = detectpwr(input("Consumption rate: "))
+        print("[EQ RIGHT SIDE]")
+        f_mol  = detectpwr(input("Formed moles: "))
+        f_rate  = detectpwr(input("Formation rate: "))
+        print("************")
+        if f_rate == "":
+            f_rate = (c_rate*f_mol)/c_mol
+            print("> Formation rate: "+str(f_rate))
+        if c_rate == "":
+            c_rate = (f_rate*c_mol)/f_mol
+            print("> Consumption rate: "+str(c_rate))
+
+        input("[enter]")
+
+    if choice==24:
+
+        # THE CODE IN THIS CHOICE IS WRONG, DO NOT USE.
+
+        ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        leftside = []
+        loopflag = True
+        loopi = 0
+        rxn_order = 0
+        print("Enter parts in correct order...")
+
+        # reaction order
+        #==============================================================
+        # rate stays consistent                        -> zero order (power of 0)
+        # moles and rate double/halve                  -> first order (power of 1)
+        # moles double/halve, rate quadruples/quarters -> second order (power of 2)
+        # the exponentiation of the rate from the moles determines the order
+
+        while loopflag:
+            rxn_order += rxn_order
+            tmp = detectpwr(input(str(ALPHA[loopi])+"[moles]:"))
+            if tmp == "":
+                loopflag = False
+            else:
+                leftside.append(tmp)
+                loopi += 1
+        print("Overall Reaction Order: "+str(1+rxn_order))
+        input("[enter]")
+
+
         
 
 
