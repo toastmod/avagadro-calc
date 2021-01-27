@@ -57,7 +57,7 @@ def detectpwr(rcv):
             snd = tmp
     else:
         # no colon
-        tmp = ""
+        snd = ""
         if str(rcv)[-1] == "e":
             tmp = str(rcv).replace("e", "")
             # check if number (excluding decimal point)
@@ -67,16 +67,15 @@ def detectpwr(rcv):
             else:
                 # passthrough
                 snd = rcv
-        if str(rcv)[-1] == "C":
+        elif str(rcv)[-1] == "C":
             print("[Celsius to Kelvin]")
             tmp = str(rcv).replace("C", "")
             return float(float(tmp) + 273.15)
             print(snd)
-        if str(rcv)[-1] == "K":
+        elif str(rcv)[-1] == "K":
             print("[Kelvin to Celsius]")
             tmp = str(rcv).replace("K", "")
             return float(float(tmp) - 273.15)
-
 
         else:
             if str(rcv).replace(".", "").isnumeric():
@@ -773,13 +772,14 @@ while 1 == 1:
         input("[enter]")
 
     if choice == 26:
+        R = 8.314
         print("[1] Non-Linear")
-        print("[2] Linear")
+        print("[2] ln(k2/k1)=(Ea/R)((1/T1)-(1/T2))")
 
         arrchoice = input("[#]>")
 
         if arrchoice == "1":
-            R = 8.314
+
             Ea = detectpwr(input("Ea="))
             T = detectpwr(input("T="))
             A = detectpwr(input("A="))
@@ -799,57 +799,94 @@ while 1 == 1:
                 A = k / un_ln(-Ea / (R * T))
                 print("A=" + str(A))
 
-            input("[enter]")
+        if (arrchoice == "2") or (arrchoice == "3"):
 
-        if arrchoice == "2":
-            R = 8.314
-            print("[1] enter deltas directly")
-            print("[2] enter graph entires")
-            dorg = input("[#]>")
+            # =========T and K entry==========
+            print("==[T]==")
+            print("[1] enter full ((1/T1)-(1/T2)) value")
+            print("[2] enter T1 and T2 individually")
+            tchoice = input("[#]>")
+            if tchoice == "1":
+                tinvdelta = detectpwr(input("((1/T1)-(1/T2))="))
 
-            if dorg == "1":
-                tinvdelta = detectpwr(input("(1/T)delta="))
-                kdelta = detectpwr(input("(k)delta="))
-            if dorg == "2":
+            if tchoice == "2":
                 T1 = detectpwr(input("T1="))
-                k1 = detectpwr(input("k1="))
                 T2 = detectpwr(input("T2="))
-                k2 = detectpwr(input("k2="))
 
                 if (T1 == "") or (T2 == ""):
-                    slope = detectpwr(input("slope="))
                     tinvdelta = ""
                 else:
-                    print("T1"+str(T1))
-                    print("T2"+str(T2))
-                    tinvdelta = (1/T2) - (1/T1)
+                    tinvdelta = ((1 / T1) - (1 / T2))
 
+            print("==[K]==")
+            print("[1] enter full ln(k2/k1) value")
+            print("[2] enter k1 and k2 individually")
+            kchoice = input("[#]>")
+            if kchoice == "1":
+                lnk2k1 = detectpwr(input("ln(k2/k1)="))
+            if kchoice == "2":
+                k1 = detectpwr(input("k1="))
+                k2 = detectpwr(input("k2="))
                 if (k1 == "") or (k2 == ""):
-                    kdelta = ""
+                    lnk2k1 = ""
                 else:
-                    kdelta = (k2) - (k1)
+                    lnk2k1 = ln(k2/k1)
+            if arrchoice == "2":
+                Ea = detectpwr(input("Ea="))
+                print(Ea)
+
+            #        ==== EVAL ====
+            print("**********************")
+            # K
+            if lnk2k1 == "":
+                k2flag = True
+                if k1 == "":
+                    if k2 == "":
+                        k2flag = False # k2 was already checked
+                        # lnk2k1 is being looked for
+                        lnk2k1 = (Ea/R)*tinvdelta
+                        print("ln(k2/k1)=" + str(lnk2k1))
+                    else:
+                        # just k1 is being looked for
+                        if arrchoice == "2":
+                            k1 = 1/(un_ln((Ea/R)*tinvdelta)/k2)
+                        if arrchoice == "3":
+                            k1 = 1/(un_ln(tinvdelta)/k2)
+                        print("k1=" + str(k1))
 
 
-            print("************************")
+                if (k2 == "") and k2flag:
+                    # just k2 is being looked for
+                    if arrchoice == "2":
+                        k2 = (un_ln((Ea / R) * tinvdelta) * k1)
+                    if arrchoice == "3":
+                        k2 = (un_ln(tinvdelta) * k1)
+                    print("k2=" + str(k2))
+
 
             if tinvdelta == "":
-                tinvdelta = (kdelta/slope)
+                t2flag = True
+                if T1 == "":
+                    if T2 == "":
+                        T2flag = False  # T2 was already checked
+                        # tinv is being looked for
+                        if arrchoice == "2":
+                            tinvdelta = (Ea / R) / lnk2k1
+                        if arrchoice == "3":
+                            tinvdelta = lnk2k1
+                        print("((1/T1)-(1/T2))=" + str(tinvdelta))
 
-            if kdelta == "":
-                kdelta = slope*tinvdelta
+                    else:
+                        # just T1 is being looked for
+                        T1 = 1/(((lnk2k1*R)/Ea)+(1/T2))
+                        print("T1=" + str(T1))
 
-            print("(1/T)delta= "+str(tinvdelta))
-            print("(k)delta  = "+str(kdelta))
+                if (T2 == "") and T2flag:
+                    # just T2 is being looked for
+                    T2 = -1/(((lnk2k1*R)/Ea)-(1/T1))
+                    print("T2=" + str(T2))
+        input("[enter]")
 
-            slope = (kdelta/tinvdelta)
-            Ea = (-slope)
-
-            print("slope     = " + str(slope))
-            print("Ea (J)    = " + str(Ea))
-            print("Ea (kJ)   = " + str(Ea/1000))
-            print("Ea * R    = " + str(Ea*R))
-
-            input("[enter]")
 
 
     if choice == 696969696:
