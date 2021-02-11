@@ -1,5 +1,5 @@
-from periodictable import elements
 import math
+import json
 from decimal import Decimal, getcontext
 
 tmp2 = 0
@@ -7,13 +7,17 @@ tmp2 = 0
 time0 = 0
 
 # generate table
-print("generating table...")
+from periodictable import elements
+
 ptable = {"STP": {"Pkpa": 101.321, "Patm": 1, "Tk": 273.15, "Tf": 32, "Tc": 0, "molV": 22.4, "molV1bar": 22.7}}
 for e in elements:
-    ptable[e.symbol] = {"name": e.name, "mass": e.mass, "num": e.number, "ions": e.ion}
-print("done.\n")
+    ptable[e.symbol] = {"name": e.name, "mass": e.mass, "num": e.number, "ions": tuple(e.ions), "isotopes": list(e.isotopes), "charge": e.charge}
+# print("loading data...")
+#dataf = open(".\\data.txt","r")
+#datar = dataf.readline()
+#print(datar)
+#ptable = json.loads(datar)
 
-# CUT HERE
 
 avagnum = 6.022 * (10 ** 23)
 
@@ -38,6 +42,10 @@ def detectpwr(rcv):
     snd = 0.0  # final result
     cmd = ""
     pwr = 0.0
+
+    if str(rcv) == "eq":
+        return eval(input("[eq]>> "))
+
 
     if (str(rcv) == 'None') or (str(rcv) == ""):
         return ""
@@ -64,6 +72,8 @@ def detectpwr(rcv):
             if str(tmp).replace(".", "").isnumeric():
                 pwr = float(input("*10^"))
                 snd = float(tmp) * (10 ** pwr)
+                return snd
+            
             else:
                 # passthrough
                 snd = rcv
@@ -302,6 +312,9 @@ while 1 == 1:
     print("24. Nth-order reaction formula")
     print("25. Half-life formula")
     print("26. Arrhenius Equation")
+    print("27. Kc <-> Kp (unfinished)")
+    print("28. Kw = [H+]*[OH-]")
+    
     # print("24. Rate Law")
     print()
     choice = int(input("[#]: "))
@@ -851,7 +864,39 @@ while 1 == 1:
 
             input("[enter]")
 
+    if choice == 27:
+        kc = detectpwr(input("Kc="))
+        kp = detectpwr(input("Kp="))
+        T = detectpwr(input("Temp="))
+        n = detectpwr(input("delta_n [default=1]="))
+        R = 0.08206 
 
+        if n == "":
+            n = 1
+
+        print("*******************")
+        if kc == "":
+            kc = kp/((R*T)**n)
+            print("Kc="+str(kc))
+        if kp == "":
+            kp = kc*((R*T)**n)
+            print("Kp="+str(kp))
+
+        input("[enter]")
+    if choice == 28:
+        kw = detectpwr(input("kw="))
+        pH = detectpwr(input("ph="))
+        pOH = detectpwr(input("pOH="))
+        if kw == "":
+            kw = pH*pOH
+            print("kw="+str(kw))
+        if pH == "":
+            pH = kw/pOH
+            print("pH="+str(pH))
+        if pOH == "":
+            pOH = kw/pH
+            print("pOH="+str(pOH))
+        input("[enter]")
     if choice == 696969696:
 
         # THE CODE IN THIS CHOICE IS WRONG, DO NOT USE.
