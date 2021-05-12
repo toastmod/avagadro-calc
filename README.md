@@ -1,5 +1,5 @@
 # avagadro-calc
-A python script i wrote to breeze through my university chemistry course.<br>
+A python script i wrote to breeze through my university chemistry course.<br><br>
 Note: since I finished my chem course this repo is left in it's unfinished state.<br>
 So feel free to contribute if you find yourself adding to it!
 
